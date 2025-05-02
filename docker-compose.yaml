@@ -1,0 +1,20 @@
+include:
+  - book/deployment/docker-compose.yaml
+
+services:
+  nats:
+    image: nats:2.11-alpine3.21
+#    command:
+#      - "--jetstream"
+    ports:
+      - "4222:4222"
+
+  nats-ui:
+    image: ghcr.io/nats-nui/nui:latest
+    ports:
+      - "31311:31311"
+    volumes:
+      - nui-db:/db
+
+volumes:
+  nui-db: {}

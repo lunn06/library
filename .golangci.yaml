@@ -1,15 +1,28 @@
+version: "2"
+
 run:
   tests: false
-output:
-  format: "checkstyle:lint_report.json,colored-line-number"
 linters:
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - typecheck
-    - unused
     - cyclop
-    - gofmt
     - lll
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

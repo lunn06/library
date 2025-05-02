@@ -1,5 +1,5 @@
 lint_report.json
-.idea/
+../.idea/
 .vscode/
 .vim/
 dist/
