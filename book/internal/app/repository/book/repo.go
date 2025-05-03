@@ -3,6 +3,7 @@ package book
 import (
 	"context"
 
+	"github.com/lunn06/library/book/internal/app/repository/errors"
 	"github.com/lunn06/library/book/internal/domain"
 	"github.com/lunn06/library/book/internal/infrastructure/db/ent"
 	"github.com/lunn06/library/book/internal/infrastructure/db/ent/book"
@@ -31,6 +32,9 @@ type EntRepo struct {
 
 func (ebr *EntRepo) Get(ctx context.Context, id int) (domain.Book, error) {
 	entBook, err := ebr.BookClient.Get(ctx, id)
+	if ent.IsNotFound(err) {
+		return domain.Book{}, errors.ErrNotFound{Inner: err}
+	}
 	if err != nil {
 		return domain.Book{}, err
 	}
@@ -55,6 +59,9 @@ func (ebr *EntRepo) SearchByTitleWithLimitOffset(
 		Offset(offset).
 		Limit(limit).
 		All(ctx)
+	if ent.IsNotFound(err) {
+		return nil, errors.ErrNotFound{Inner: err}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +108,9 @@ func (ebr *EntRepo) Update(
 		AddAuthorIDs(authorsIDs...).
 		AddGenreIDs(genresIDs...).
 		Exec(ctx)
+	if ent.IsNotFound(err) {
+		return errors.ErrNotFound{Inner: err}
+	}
 
 	return err
 }

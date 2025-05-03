@@ -3,6 +3,7 @@ package genre
 import (
 	"context"
 
+	"github.com/lunn06/library/book/internal/app/repository/errors"
 	"github.com/lunn06/library/book/internal/domain"
 	"github.com/lunn06/library/book/internal/infrastructure/db/ent"
 	"github.com/lunn06/library/book/internal/infrastructure/db/ent/converter"
@@ -29,6 +30,9 @@ type EntRepo struct {
 
 func (egr *EntRepo) Get(ctx context.Context, id int) (domain.Genre, error) {
 	entGenre, err := egr.GenreClient.Get(ctx, id)
+	if ent.IsNotFound(err) {
+		return domain.Genre{}, errors.ErrNotFound{Inner: err}
+	}
 	if err != nil {
 		return domain.Genre{}, err
 	}
@@ -53,6 +57,9 @@ func (egr *EntRepo) SearchByTitleWithLimitOffset(
 		Offset(offset).
 		Limit(limit).
 		All(ctx)
+	if ent.IsNotFound(err) {
+		return nil, errors.ErrNotFound{Inner: err}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +88,9 @@ func (egr *EntRepo) Update(ctx context.Context, genre domain.Genre, booksIDs ...
 		SetDescription(genre.Description).
 		AddBookIDs(booksIDs...).
 		Exec(ctx)
+	if ent.IsNotFound(err) {
+		return errors.ErrNotFound{Inner: err}
+	}
 
 	return err
 }

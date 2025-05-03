@@ -3,12 +3,14 @@
 package integration
 
 import (
-	genrepb "github.com/lunn06/library/book/internal/api/proto/genre"
+	"net/http"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
-	"net/http"
-	"testing"
+
+	genrepb "github.com/lunn06/library/book/internal/api/proto/genre"
 )
 
 func TestGenreCreateWithNoBooks(t *testing.T) {
@@ -95,4 +97,56 @@ func TestGenreUpdateWithNoBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(getResp.StatusCode))
 	assert.Equal(t, testUpdatedTitle, getResp.Title)
 	assert.Equal(t, testUpdatedDescription, getResp.Description)
+}
+
+func TestGenreDelete(t *testing.T) {
+	const (
+		testTitle = "TestGenreDelete"
+		testDescription
+	)
+	// Put author
+	putReq := genrepb.CreateRequest{
+		Title:       testTitle,
+		Description: testDescription,
+	}
+	var putResp genrepb.CreateResponse
+	err := request(genrePutSubj, &putReq, &putResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
+	//////////////
+
+	// Check putted author
+	getReq := genrepb.GetRequest{
+		GenreId: putResp.GenreId,
+	}
+	var getResp genrepb.GetResponse
+	err = request(genreGetSubj, &getReq, &getResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(getResp.StatusCode))
+	assert.Equal(t, testTitle, getResp.Title)
+	assert.Equal(t, testDescription, getResp.Description)
+	//////////////
+
+	// Delete author
+	deleteReq := genrepb.DeleteRequest{
+		GenreId: putResp.GenreId,
+	}
+	var deleteResp genrepb.EmptyResponse
+	err = request(genreDeleteSubj, &deleteReq, &deleteResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(deleteResp.StatusCode))
+	//////////////
+
+	// Check deleted author not found
+	getReq = genrepb.GetRequest{
+		GenreId: putResp.GenreId,
+	}
+	getResp = genrepb.GetResponse{}
+	err = request(genreGetSubj, &getReq, &getResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusNotFound, int(getResp.StatusCode))
 }

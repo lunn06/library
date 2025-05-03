@@ -11,6 +11,7 @@ import (
 
 	authorpb "github.com/lunn06/library/book/internal/api/proto/author"
 	authorservice "github.com/lunn06/library/book/internal/app/service/author"
+	"github.com/lunn06/library/book/internal/app/service/errors"
 )
 
 func RegisterAuthorConsumer(conn *nats.Conn, cons *AuthorConsumer) error {
@@ -70,8 +71,11 @@ func (ac *AuthorConsumer) Search(msg *nats.Msg) {
 	defer cancel()
 
 	authors, err := ac.service.Search(ctx, search)
-	if err != nil {
-		slog.Error("Error on author get", "err", err)
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on author search", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
+		slog.Error("Error on author search", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -118,7 +122,10 @@ func (ac *AuthorConsumer) Get(msg *nats.Msg) {
 	defer cancel()
 
 	author, err := ac.service.Get(ctx, int(req.AuthorId))
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on author get", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
 		slog.Error("Error on author get", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
@@ -211,7 +218,10 @@ func (ac *AuthorConsumer) Update(msg *nats.Msg) {
 	defer cancel()
 
 	err := ac.service.Update(ctx, update)
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on author update", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
 		slog.Error("Error on author update", "err", err)
 		statusCode = http.StatusInternalServerError
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 
 	bookrepo "github.com/lunn06/library/book/internal/app/repository/book"
+	repoerrors "github.com/lunn06/library/book/internal/app/repository/errors"
+	"github.com/lunn06/library/book/internal/app/service/errors"
 	"github.com/lunn06/library/book/internal/domain"
 )
 
@@ -72,15 +74,30 @@ func (s *Service) Update(ctx context.Context, req UpdateRequest) error {
 		CoverURL:    req.CoverURL,
 	}
 
-	return s.repo.Update(ctx, book, req.AuthorsIDs, req.GenresIDs)
+	err := s.repo.Update(ctx, book, req.AuthorsIDs, req.GenresIDs)
+	if repoerrors.IsErrNotFound(err) {
+		return errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return err
 }
 
 func (s *Service) Search(ctx context.Context, req SearchRequest) ([]domain.Book, error) {
-	return s.repo.SearchByTitleWithLimitOffset(ctx, req.Title, req.Limit, req.Offset)
+	books, err := s.repo.SearchByTitleWithLimitOffset(ctx, req.Title, req.Limit, req.Offset)
+	if repoerrors.IsErrNotFound(err) {
+		return nil, errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return books, err
 }
 
 func (s *Service) Get(ctx context.Context, id int) (domain.Book, error) {
-	return s.repo.Get(ctx, id)
+	book, err := s.repo.Get(ctx, id)
+	if repoerrors.IsErrNotFound(err) {
+		return domain.Book{}, errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return book, err
 }
 
 func (s *Service) Delete(ctx context.Context, id int) error {

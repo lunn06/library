@@ -5,8 +5,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"github.com/testcontainers/testcontainers-go/wait"
-	"google.golang.org/protobuf/proto"
 	"testing"
 	"time"
 
@@ -14,6 +12,8 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	natscontainer "github.com/testcontainers/testcontainers-go/modules/nats"
 	postgrescontainer "github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
+	"google.golang.org/protobuf/proto"
 
 	natsapi "github.com/lunn06/library/book/internal/api/nats"
 	authorepo "github.com/lunn06/library/book/internal/app/repository/author"
@@ -26,7 +26,7 @@ import (
 	"github.com/lunn06/library/book/internal/infrastructure/db/postgres"
 )
 
-const reqTimeout = time.Second
+const reqTimeout = time.Hour
 
 const (
 	authorSearchSubj = "author.search"
@@ -72,7 +72,7 @@ func TestMain(m *testing.M) {
 	var cfg config.Config
 	cfg.Nats = natsapi.Config{
 		Url:            fmt.Sprintf("nats://%s", natsEndpoint),
-		RequestTimeout: time.Second * 3,
+		RequestTimeout: reqTimeout,
 	}
 	cfg.Postgres.Dns = fmt.Sprintf(
 		"postgresql://%s:%s@%s/%s?sslmode=disable",

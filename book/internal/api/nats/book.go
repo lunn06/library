@@ -11,6 +11,7 @@ import (
 
 	bookpb "github.com/lunn06/library/book/internal/api/proto/book"
 	bookservice "github.com/lunn06/library/book/internal/app/service/book"
+	"github.com/lunn06/library/book/internal/app/service/errors"
 )
 
 func RegisterBookConsumer(conn *nats.Conn, cons *BookConsumer) error {
@@ -70,7 +71,10 @@ func (bc *BookConsumer) Search(msg *nats.Msg) {
 	defer cancel()
 
 	books, err := bc.service.Search(ctx, search)
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on book search", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
 		slog.Error("Error on book search", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
@@ -121,7 +125,10 @@ func (bc *BookConsumer) Get(msg *nats.Msg) {
 	defer cancel()
 
 	book, err := bc.service.Get(ctx, int(req.BookId))
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on book get", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
 		slog.Error("Error on book get", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
@@ -225,7 +232,10 @@ func (bc *BookConsumer) Update(msg *nats.Msg) {
 	defer cancel()
 
 	err := bc.service.Update(ctx, update)
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on book update", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
 		slog.Error("Error on book update", "err", err)
 		statusCode = http.StatusInternalServerError
 	}

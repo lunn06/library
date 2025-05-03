@@ -10,6 +10,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	genrepb "github.com/lunn06/library/book/internal/api/proto/genre"
+	"github.com/lunn06/library/book/internal/app/service/errors"
 	genreservice "github.com/lunn06/library/book/internal/app/service/genre"
 )
 
@@ -70,7 +71,11 @@ func (gc *GenreConsumer) Search(msg *nats.Msg) {
 	defer cancel()
 
 	books, err := gc.service.Search(ctx, search)
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on genre search", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
+		slog.Error("Error on genre search", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -117,7 +122,11 @@ func (gc *GenreConsumer) Get(msg *nats.Msg) {
 	defer cancel()
 
 	genre, err := gc.service.Get(ctx, int(req.GenreId))
-	if err != nil {
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on genre get", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
+		slog.Error("Error on genre get", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -208,8 +217,11 @@ func (gc *GenreConsumer) Update(msg *nats.Msg) {
 	defer cancel()
 
 	err := gc.service.Update(ctx, update)
-	if err != nil {
-		slog.Error("Error on update", "err", err)
+	if errors.IsErrResourceNotFound(err) {
+		slog.Error("Not found on genre update", "err", err)
+		statusCode = http.StatusNotFound
+	} else if err != nil {
+		slog.Error("Error on genre update", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 

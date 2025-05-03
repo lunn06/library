@@ -3,12 +3,14 @@
 package integration
 
 import (
-	bookpb "github.com/lunn06/library/book/internal/api/proto/book"
+	"net/http"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
-	"net/http"
-	"testing"
+
+	bookpb "github.com/lunn06/library/book/internal/api/proto/book"
 )
 
 func TestBookCreateWithNoAdditional(t *testing.T) {
@@ -111,4 +113,62 @@ func TestBookUpdateWithNoAdditional(t *testing.T) {
 	assert.Equal(t, testUpdatedTitle, getResp.Title)
 	assert.Equal(t, testUpdatedDescription, getResp.Description)
 	assert.Equal(t, testUpdatedBookUrl, getResp.BookUrl)
+}
+
+func TestBookDelete(t *testing.T) {
+	const (
+		testUserID = 999
+		testTitle  = "TestBookDelete"
+		testDescription
+		testBookUrl
+	)
+	// Put author
+	putReq := bookpb.CreateRequest{
+		UserId:      testUserID,
+		Title:       testTitle,
+		Description: testDescription,
+		BookUrl:     testBookUrl,
+	}
+	var putResp bookpb.CreateResponse
+	err := request(bookPutSubj, &putReq, &putResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
+	//////////////
+
+	// Check putted author
+	getReq := bookpb.GetRequest{
+		BookId: putResp.BookId,
+	}
+	var getResp bookpb.GetResponse
+	err = request(bookGetSubj, &getReq, &getResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(getResp.StatusCode))
+	assert.Equal(t, testUserID, int(getResp.UserId))
+	assert.Equal(t, testTitle, getResp.Title)
+	assert.Equal(t, testDescription, getResp.Description)
+	assert.Equal(t, testBookUrl, getResp.BookUrl)
+	//////////////
+
+	// Delete author
+	deleteReq := bookpb.DeleteRequest{
+		BookId: putResp.BookId,
+	}
+	var deleteResp bookpb.EmptyResponse
+	err = request(bookDeleteSubj, &deleteReq, &deleteResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, int(deleteResp.StatusCode))
+	//////////////
+
+	// Check deleted author not found
+	getReq = bookpb.GetRequest{
+		BookId: putResp.BookId,
+	}
+	getResp = bookpb.GetResponse{}
+	err = request(bookGetSubj, &getReq, &getResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusNotFound, int(getResp.StatusCode))
 }

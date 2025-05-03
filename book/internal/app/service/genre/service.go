@@ -3,7 +3,9 @@ package genre
 import (
 	"context"
 
+	repoerrors "github.com/lunn06/library/book/internal/app/repository/errors"
 	genrerepo "github.com/lunn06/library/book/internal/app/repository/genre"
+	"github.com/lunn06/library/book/internal/app/service/errors"
 	"github.com/lunn06/library/book/internal/domain"
 )
 
@@ -58,15 +60,30 @@ func (s *Service) Update(ctx context.Context, req UpdateRequest) error {
 		Description: req.Description,
 	}
 
-	return s.repo.Update(ctx, genre, req.BooksIDs...)
+	err := s.repo.Update(ctx, genre, req.BooksIDs...)
+	if repoerrors.IsErrNotFound(err) {
+		return errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return err
 }
 
 func (s *Service) Search(ctx context.Context, req SearchRequest) ([]domain.Genre, error) {
-	return s.repo.SearchByTitleWithLimitOffset(ctx, req.Title, req.Limit, req.Offset)
+	genres, err := s.repo.SearchByTitleWithLimitOffset(ctx, req.Title, req.Limit, req.Offset)
+	if repoerrors.IsErrNotFound(err) {
+		return nil, errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return genres, err
 }
 
 func (s *Service) Get(ctx context.Context, id int) (domain.Genre, error) {
-	return s.repo.Get(ctx, id)
+	genre, err := s.repo.Get(ctx, id)
+	if repoerrors.IsErrNotFound(err) {
+		return domain.Genre{}, errors.ErrResourceNotFound{Inner: err}
+	}
+
+	return genre, err
 }
 
 func (s *Service) Delete(ctx context.Context, id int) error {
