@@ -18,7 +18,7 @@ func TestGenreCreateWithNoBooks(t *testing.T) {
 		testTitle = "TestGenreCreateWithNoBooks"
 		testDescription
 	)
-	// Put author
+	// Put genre
 	req := genrepb.CreateRequest{
 		Title:       testTitle,
 		Description: testDescription,
@@ -35,7 +35,7 @@ func TestGenreCreateWithNoBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(resp.StatusCode))
 	//////////////
 
-	// Check putted author
+	// Check putted genre
 	getReq := genrepb.GetRequest{
 		GenreId: resp.GenreId,
 	}
@@ -61,7 +61,7 @@ func TestGenreUpdateWithNoBooks(t *testing.T) {
 		testUpdatedTitle = "UpdatedTestGenreUpdateWithNoBooks"
 		testUpdatedDescription
 	)
-	// Put author
+	// Put genre
 	putReq := genrepb.CreateRequest{
 		Title:       testTitle,
 		Description: testDescription,
@@ -73,7 +73,7 @@ func TestGenreUpdateWithNoBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Update author
+	// Update genre
 	updateReq := genrepb.UpdateRequest{
 		Id:          putResp.GenreId,
 		Title:       testUpdatedTitle,
@@ -86,7 +86,7 @@ func TestGenreUpdateWithNoBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(updateResp.StatusCode))
 	//////////////
 
-	// Check updated author
+	// Check updated genre
 	getReq := genrepb.GetRequest{
 		GenreId: putResp.GenreId,
 	}
@@ -104,7 +104,7 @@ func TestGenreDelete(t *testing.T) {
 		testTitle = "TestGenreDelete"
 		testDescription
 	)
-	// Put author
+	// Put genre
 	putReq := genrepb.CreateRequest{
 		Title:       testTitle,
 		Description: testDescription,
@@ -116,7 +116,7 @@ func TestGenreDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Check putted author
+	// Check putted genre
 	getReq := genrepb.GetRequest{
 		GenreId: putResp.GenreId,
 	}
@@ -129,7 +129,7 @@ func TestGenreDelete(t *testing.T) {
 	assert.Equal(t, testDescription, getResp.Description)
 	//////////////
 
-	// Delete author
+	// Delete genre
 	deleteReq := genrepb.DeleteRequest{
 		GenreId: putResp.GenreId,
 	}
@@ -140,7 +140,7 @@ func TestGenreDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(deleteResp.StatusCode))
 	//////////////
 
-	// Check deleted author not found
+	// Check deleted genre not found
 	getReq = genrepb.GetRequest{
 		GenreId: putResp.GenreId,
 	}

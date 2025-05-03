@@ -8,7 +8,7 @@ RUN go mod download
 COPY ../.. .
 
 # Stage 2 - Linter
-FROM golangci/golangci-lint:v1.68-alpine as linter
+FROM golangci/golangci-lint:v2.1.5-alpine as linter
 
 WORKDIR /src
 COPY ../.. .
