@@ -1,11 +1,12 @@
 include:
-  - book/deployment/docker-compose.yaml
+  - bookinfo/deployment/docker-compose.yaml
+  - bookfile/deployment/docker-compose.yaml
 
 services:
   nats:
     image: nats:2.11-alpine3.21
-#    command:
-#      - "--jetstream"
+    command:
+      - "--jetstream"
     ports:
       - "4222:4222"
 

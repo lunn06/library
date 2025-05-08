@@ -1,0 +1,6 @@
+!converter/**
+!schema/**
+!generate.go
+!.gitignore
+
+*
