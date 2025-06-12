@@ -4,7 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const prefix = "BOOKINFO"
+const prefix = "REVIEW"
 
 func Load() (Config, error) {
 	var cfg Config

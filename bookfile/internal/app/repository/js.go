@@ -1,9 +1,11 @@
 package repository
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"errors"
+
+	"github.com/docker/docker/pkg/ioutils"
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go/jetstream"
 
@@ -33,15 +35,9 @@ func (jbr *JsBookRepo) Get(ctx context.Context, bookUUID uuid.UUID) (domain.Book
 		}
 		return domain.Book{}, err
 	}
-	defer obj.Close()
 
 	objInfo, err := obj.Info()
 	if err != nil {
-		return domain.Book{}, err
-	}
-
-	bytesBuf := make([]byte, objInfo.Size)
-	if _, err = obj.Read(bytesBuf); err != nil {
 		return domain.Book{}, err
 	}
 
@@ -50,7 +46,10 @@ func (jbr *JsBookRepo) Get(ctx context.Context, bookUUID uuid.UUID) (domain.Book
 	return domain.Book{
 		UUID:     bookUUID,
 		FileName: fileName,
-		Buffer:   bytes.NewBuffer(bytesBuf),
+		FileReadCloser: ioutils.NewReadCloserWrapper(
+			bufio.NewReader(obj),
+			obj.Close,
+		),
 	}, nil
 }
 
@@ -62,8 +61,11 @@ func (jbr *JsBookRepo) Put(ctx context.Context, book domain.Book) error {
 		},
 	}
 
-	_, err := jbr.ObjectStore.Put(ctx, meta, book.Buffer)
-	return err
+	_, err := jbr.ObjectStore.Put(ctx, meta, bufio.NewReader(book.FileReadCloser))
+	return errors.Join(
+		err,
+		book.FileReadCloser.Close(),
+	)
 }
 
 func (jbr *JsBookRepo) Delete(ctx context.Context, bookUUID uuid.UUID) error {

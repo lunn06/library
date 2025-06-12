@@ -19,7 +19,7 @@ $ go mod download
 ### Terminal
 
 ```shell
-$ go build ./cmd/review
+$ go build ./cmd/gateway
 ```
 
 ## Configuration

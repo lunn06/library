@@ -1,0 +1,27 @@
+syntax = "proto3";
+package bookfile;
+
+option go_package = "./bookfile";
+
+message DeleteResponse {
+  int32 status_code = 1;
+}
+
+message DeleteRequest {
+  string book_uuid = 1;
+}
+
+message GetRequest {
+  string book_uuid = 1;
+}
+
+message GetResponse {
+  string book_uuid = 1;
+  string file_name = 2;
+  bytes  file = 3;
+}
+
+message CreateResponse {
+  string book_uuid = 1;
+  int32 status_code = 2;
+}

@@ -23,6 +23,8 @@ message GetResponse {
   string book_url = 5;
   optional string cover_url = 6;
   int32 status_code = 7;
+  repeated int64 authors_ids = 8;
+  repeated int64 genres_ids = 9;
 }
 
 

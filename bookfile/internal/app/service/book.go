@@ -1,9 +1,10 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"errors"
+	"io"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -25,11 +26,14 @@ type BookService struct {
 	repo repository.BookRepo
 }
 
-func (s *BookService) Create(ctx context.Context, fileName string, buf *bytes.Buffer) (uuid.UUID, error) {
-	if fileName == "" {
+func (s *BookService) Create(ctx context.Context, fileName string, r io.ReadCloser) (uuid.UUID, error) {
+	switch {
+	case fileName == "":
 		fileName = "unknown"
+	case !strings.HasSuffix(fileName, ".pdf"):
+		return uuid.Nil, errors.New("invalid file name")
 	}
-	if buf == nil {
+	if r == nil {
 		return uuid.Nil, errors.New("buffer is nil")
 	}
 
@@ -39,9 +43,9 @@ func (s *BookService) Create(ctx context.Context, fileName string, buf *bytes.Bu
 	}
 
 	book := domain.Book{
-		UUID:     bookUUID,
-		FileName: fileName,
-		Buffer:   buf,
+		UUID:           bookUUID,
+		FileName:       fileName,
+		FileReadCloser: r,
 	}
 	if err = s.repo.Put(ctx, book); err != nil {
 		return uuid.Nil, err

@@ -36,11 +36,11 @@ const (
 	authorUpdateSubj = "author.update"
 	authorDeleteSubj = "author.delete"
 
-	bookSearchSubj = "review.search"
-	bookGetSubj    = "review.get"
-	bookPutSubj    = "review.put"
-	bookUpdateSubj = "review.update"
-	bookDeleteSubj = "review.delete"
+	bookSearchSubj = "gateway.search"
+	bookGetSubj    = "gateway.get"
+	bookPutSubj    = "gateway.put"
+	bookUpdateSubj = "gateway.update"
+	bookDeleteSubj = "gateway.delete"
 
 	genreSearchSubj = "genre.search"
 	genreGetSubj    = "genre.get"
@@ -50,9 +50,9 @@ const (
 )
 
 const (
-	postgresUser     = "test-review-user"
-	postgresPassword = "test-review-password"
-	postgresDb       = "test-review-db"
+	postgresUser     = "test-gateway-user"
+	postgresPassword = "test-gateway-password"
+	postgresDb       = "test-gateway-db"
 	postgresSslMode  = "disable"
 )
 

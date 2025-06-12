@@ -26,17 +26,17 @@ import (
 const reqTimeout = time.Second
 
 const (
-	reviewGetAllByBookIDSubj = "review.getAllByBookID"
-	reviewGetSubj            = "review.get"
-	reviewPutSubj            = "review.put"
-	reviewUpdateSubj         = "review.update"
-	reviewDeleteSubj         = "review.delete"
+	reviewGetAllByBookIDSubj = "gateway.getAllByBookID"
+	reviewGetSubj            = "gateway.get"
+	reviewPutSubj            = "gateway.put"
+	reviewUpdateSubj         = "gateway.update"
+	reviewDeleteSubj         = "gateway.delete"
 )
 
 const (
-	postgresUser     = "test-review-user"
-	postgresPassword = "test-review-password"
-	postgresDb       = "test-review-db"
+	postgresUser     = "test-gateway-user"
+	postgresPassword = "test-gateway-password"
+	postgresDb       = "test-gateway-db"
 	postgresSslMode  = "disable"
 )
 
@@ -72,7 +72,7 @@ func TestMain(m *testing.M) {
 
 	reviewRepo := repository.NewEntReviewRepo(entClient)
 	reviewService := service.NewReviewService(reviewRepo)
-	reviewConsumer := natsapi.NewBookConsumer(reviewService)
+	reviewConsumer := natsapi.NewReviewConsumer(reviewService)
 
 	nc, err = nats.Connect(cfg.Nats.URL)
 

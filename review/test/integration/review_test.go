@@ -20,7 +20,7 @@ func TestReviewCreate(t *testing.T) {
 		testText
 		testScore = 1
 	)
-	// Put review
+	// Put gateway
 	req := reviewpb.CreateRequest{
 		UserId: testUserID,
 		BookId: testBookID,
@@ -34,7 +34,7 @@ func TestReviewCreate(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(resp.StatusCode))
 	//////////////
 
-	// Check putted review
+	// Check putted gateway
 	getReq := reviewpb.GetRequest{
 		ReviewId: resp.ReviewId,
 	}
@@ -62,7 +62,7 @@ func TestReviewUpdate(t *testing.T) {
 		testUpdatedText
 		testUpdatedScore = 2
 	)
-	// Put review
+	// Put gateway
 	putReq := reviewpb.CreateRequest{
 		UserId: testUserID,
 		BookId: testBookID,
@@ -77,7 +77,7 @@ func TestReviewUpdate(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Update review
+	// Update gateway
 	updateReq := reviewpb.UpdateRequest{
 		Id:    putResp.ReviewId,
 		Title: testUpdatedTitle,
@@ -91,7 +91,7 @@ func TestReviewUpdate(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(updateResp.StatusCode))
 	//////////////
 
-	// Check updated review
+	// Check updated gateway
 	getReq := reviewpb.GetRequest{
 		ReviewId: putResp.ReviewId,
 	}
@@ -115,7 +115,7 @@ func TestReviewDelete(t *testing.T) {
 		testText
 		testScore = 1
 	)
-	// Put review
+	// Put gateway
 	putReq := reviewpb.CreateRequest{
 		UserId: testUserID,
 		BookId: testBookID,
@@ -130,7 +130,7 @@ func TestReviewDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Check updated review
+	// Check updated gateway
 	getReq := reviewpb.GetRequest{
 		ReviewId: putResp.ReviewId,
 	}
@@ -146,7 +146,7 @@ func TestReviewDelete(t *testing.T) {
 	assert.Equal(t, testScore, int(getResp.Score))
 	//////////////
 
-	// Delete review
+	// Delete gateway
 	deleteReq := reviewpb.DeleteRequest{
 		ReviewId: putResp.ReviewId,
 	}
@@ -157,7 +157,7 @@ func TestReviewDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(deleteResp.StatusCode))
 	//////////////
 
-	// Check deleted review not found
+	// Check deleted gateway not found
 	getReq = reviewpb.GetRequest{
 		ReviewId: putResp.ReviewId,
 	}

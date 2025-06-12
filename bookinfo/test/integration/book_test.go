@@ -20,7 +20,7 @@ func TestBookCreateWithNoAdditional(t *testing.T) {
 		testDescription
 		testBookUrl
 	)
-	// Put review
+	// Put gateway
 	req := bookpb.CreateRequest{
 		UserId:      testUserID,
 		Title:       testTitle,
@@ -39,7 +39,7 @@ func TestBookCreateWithNoAdditional(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(resp.StatusCode))
 	//////////////
 
-	// Check putted review
+	// Check putted gateway
 	getReq := bookpb.GetRequest{
 		BookId: resp.BookId,
 	}
@@ -71,7 +71,7 @@ func TestBookUpdateWithNoAdditional(t *testing.T) {
 		testUpdatedDescription
 		testUpdatedBookUrl
 	)
-	// Put review
+	// Put gateway
 	putReq := bookpb.CreateRequest{
 		UserId:      testUserID,
 		Title:       testTitle,
@@ -85,7 +85,7 @@ func TestBookUpdateWithNoAdditional(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Update review
+	// Update gateway
 	updateReq := bookpb.UpdateRequest{
 		Id:          putResp.BookId,
 		UserId:      testUpdatedUserID,
@@ -100,7 +100,7 @@ func TestBookUpdateWithNoAdditional(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(updateResp.StatusCode))
 	//////////////
 
-	// Check updated review
+	// Check updated gateway
 	getReq := bookpb.GetRequest{
 		BookId: putResp.BookId,
 	}
@@ -122,7 +122,7 @@ func TestBookDelete(t *testing.T) {
 		testDescription
 		testBookUrl
 	)
-	// Put review
+	// Put gateway
 	putReq := bookpb.CreateRequest{
 		UserId:      testUserID,
 		Title:       testTitle,
@@ -136,7 +136,7 @@ func TestBookDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(putResp.StatusCode))
 	//////////////
 
-	// Check putted review
+	// Check putted gateway
 	getReq := bookpb.GetRequest{
 		BookId: putResp.BookId,
 	}
@@ -151,7 +151,7 @@ func TestBookDelete(t *testing.T) {
 	assert.Equal(t, testBookUrl, getResp.BookUrl)
 	//////////////
 
-	// Delete review
+	// Delete gateway
 	deleteReq := bookpb.DeleteRequest{
 		BookId: putResp.BookId,
 	}
@@ -162,7 +162,7 @@ func TestBookDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, int(deleteResp.StatusCode))
 	//////////////
 
-	// Check deleted review not found
+	// Check deleted gateway not found
 	getReq = bookpb.GetRequest{
 		BookId: putResp.BookId,
 	}

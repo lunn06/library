@@ -35,7 +35,7 @@ func RegisterReviewConsumer(conn *nats.Conn, cons *ReviewConsumer) error {
 	return nil
 }
 
-func NewBookConsumer(service *service.ReviewService) *ReviewConsumer {
+func NewReviewConsumer(service *service.ReviewService) *ReviewConsumer {
 	return &ReviewConsumer{
 		service: service,
 	}

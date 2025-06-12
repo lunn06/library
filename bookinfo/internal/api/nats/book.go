@@ -20,11 +20,11 @@ func RegisterBookConsumer(conn *nats.Conn, cons *BookConsumer) error {
 		middleware.Logger(slog.Default()),
 	}
 	for subj, handler := range map[string]nats.MsgHandler{
-		"review.search": cons.Search,
-		"review.get":    cons.Get,
-		"review.put":    cons.Put,
-		"review.update": cons.Update,
-		"review.delete": cons.Delete,
+		"book.search": cons.Search,
+		"book.get":    cons.Get,
+		"book.put":    cons.Put,
+		"book.update": cons.Update,
+		"book.delete": cons.Delete,
 	} {
 		_, err := conn.Subscribe(subj, middleware.With(handler, mws...))
 		if err != nil {
@@ -70,10 +70,10 @@ func (bc *BookConsumer) Search(msg *nats.Msg) {
 
 	books, err := bc.service.Search(context.Background(), search)
 	if errors.IsErrResourceNotFound(err) {
-		slog.Error("Not found on review search", "err", err)
+		slog.Error("Not found on gateway search", "err", err)
 		statusCode = http.StatusNotFound
 	} else if err != nil {
-		slog.Error("Error on review search", "err", err)
+		slog.Error("Error on gateway search", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -121,11 +121,21 @@ func (bc *BookConsumer) Get(msg *nats.Msg) {
 
 	book, err := bc.service.Get(context.Background(), int(req.BookId))
 	if errors.IsErrResourceNotFound(err) {
-		slog.Error("Not found on review get", "err", err)
+		slog.Error("Not found on gateway get", "err", err)
 		statusCode = http.StatusNotFound
 	} else if err != nil {
-		slog.Error("Error on review get", "err", err)
+		slog.Error("Error on gateway get", "err", err)
 		statusCode = http.StatusInternalServerError
+	}
+
+	authorsIDs := make([]int64, len(book.Authors))
+	for i, author := range book.Authors {
+		authorsIDs[i] = int64(author.ID)
+	}
+
+	genresIDs := make([]int64, len(book.Genres))
+	for i, genre := range book.Genres {
+		genresIDs[i] = int64(genre.ID)
 	}
 
 	out, err := proto.Marshal(&bookpb.GetResponse{
@@ -135,6 +145,8 @@ func (bc *BookConsumer) Get(msg *nats.Msg) {
 		Description: book.Description,
 		BookUrl:     book.BookURL,
 		CoverUrl:    book.CoverURL,
+		AuthorsIds:  authorsIDs,
+		GenresIds:   genresIDs,
 		StatusCode:  int32(statusCode),
 	})
 	if err != nil {
@@ -175,7 +187,7 @@ func (bc *BookConsumer) Put(msg *nats.Msg) {
 
 	id, err := bc.service.Create(context.Background(), create)
 	if err != nil {
-		slog.Error("Error on review put", "err", err)
+		slog.Error("Error on gateway put", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -222,10 +234,10 @@ func (bc *BookConsumer) Update(msg *nats.Msg) {
 
 	err := bc.service.Update(context.Background(), update)
 	if errors.IsErrResourceNotFound(err) {
-		slog.Error("Not found on review update", "err", err)
+		slog.Error("Not found on gateway update", "err", err)
 		statusCode = http.StatusNotFound
 	} else if err != nil {
-		slog.Error("Error on review update", "err", err)
+		slog.Error("Error on gateway update", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -260,7 +272,7 @@ func (bc *BookConsumer) Delete(msg *nats.Msg) {
 
 	err := bc.service.Delete(context.Background(), int(req.BookId))
 	if err != nil {
-		slog.Error("Error on review delete", "err", err)
+		slog.Error("Error on gateway delete", "err", err)
 		statusCode = http.StatusInternalServerError
 	}
 

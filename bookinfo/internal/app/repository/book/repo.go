@@ -31,7 +31,11 @@ type EntRepo struct {
 // TODO: add errors handling
 
 func (ebr *EntRepo) Get(ctx context.Context, id int) (domain.Book, error) {
-	entBook, err := ebr.BookClient.Get(ctx, id)
+	entBook, err := ebr.BookClient.Query().
+		Where(book.ID(id)).
+		WithGenres().
+		WithAuthors().
+		Only(ctx)
 	if ent.IsNotFound(err) {
 		return domain.Book{}, errors.ErrNotFound{Inner: err}
 	}

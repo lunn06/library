@@ -1,7 +1,3 @@
-include:
-  - bookinfo/deployment/docker-compose.yaml
-  - bookfile/deployment/docker-compose.yaml
-
 services:
   nats:
     image: nats:2.11-alpine3.21
@@ -16,6 +12,86 @@ services:
       - "31311:31311"
     volumes:
       - nui-db:/db
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: build/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      GATEWAY_NATS_URL: nats://nats:4222
+    depends_on:
+      nats:
+        condition: service_started
+      bookinfo:
+        condition: service_started
+      review:
+        condition: service_started
+
+  bookinfo:
+    build:
+      context: ./bookinfo
+      dockerfile: build/Dockerfile
+    environment:
+      BOOKINFO_NATS_URL: nats://nats:4222
+      BOOKINFO_POSTGRES_URL: bookinfo-postgres:5432
+      BOOKINFO_POSTGRES_USER: bookinfo-user
+      BOOKINFO_POSTGRES_PASSWORD: bookinfo-password
+      BOOKINFO_POSTGRES_DB: bookinfo-db
+    depends_on:
+      bookinfo-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  bookinfo-postgres:
+    image: postgres:17-alpine3.21
+    container_name: library-bookinfo-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: bookinfo-user
+      POSTGRES_PASSWORD: bookinfo-password
+      POSTGRES_DB: bookinfo-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookinfo-user -d bookinfo-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  review:
+    build:
+      context: ./review
+      dockerfile: build/Dockerfile
+    environment:
+      REVIEW_NATS_URL: nats://nats:4222
+      REVIEW_POSTGRES_URL: review-postgres:5432
+      REVIEW_POSTGRES_USER: review-user
+      REVIEW_POSTGRES_PASSWORD: review-password
+      REVIEW_POSTGRES_DB: review-db
+    depends_on:
+      review-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  review-postgres:
+    image: postgres:17-alpine3.21
+    container_name: library-review-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: review-user
+      POSTGRES_PASSWORD: review-password
+      POSTGRES_DB: review-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U review-user -d review-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
   nui-db: {}
